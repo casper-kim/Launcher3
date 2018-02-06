@@ -16,9 +16,7 @@
 package com.android.launcher3.compat;
 
 import android.annotation.TargetApi;
-import android.app.WallpaperColors;
 import android.app.WallpaperManager;
-import android.app.WallpaperManager.OnColorsChangedListener;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.Nullable;
@@ -32,54 +30,21 @@ public class WallpaperManagerCompatVOMR1 extends WallpaperManagerCompat {
 
     private static final String TAG = "WMCompatVOMR1";
 
-    private final WallpaperManager mWm;
     private Method mWCColorHintsMethod;
 
     WallpaperManagerCompatVOMR1(Context context) throws Throwable {
-        mWm = context.getSystemService(WallpaperManager.class);
-        String className = WallpaperColors.class.getName();
-        try {
-            mWCColorHintsMethod = WallpaperColors.class.getDeclaredMethod("getColorHints");
-        } catch (Exception exc) {
-            Log.e(TAG, "getColorHints not available", exc);
-        }
+
     }
 
     @Nullable
     @Override
     public WallpaperColorsCompat getWallpaperColors(int which) {
-        return convertColorsObject(mWm.getWallpaperColors(which));
+        return new WallpaperColorsCompat(Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK);
     }
 
     @Override
     public void addOnColorsChangedListener(final OnColorsChangedListenerCompat listener) {
-        OnColorsChangedListener onChangeListener = new OnColorsChangedListener() {
-            @Override
-            public void onColorsChanged(WallpaperColors colors, int which) {
-                listener.onColorsChanged(convertColorsObject(colors), which);
-            }
-        };
-        mWm.addOnColorsChangedListener(onChangeListener, null);
-    }
+        //listener.onColorsChanged(new WallpaperColorsCompat(Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK),1);
 
-    private WallpaperColorsCompat convertColorsObject(WallpaperColors colors) {
-        if (colors == null) {
-            return null;
-        }
-        Color primary = colors.getPrimaryColor();
-        Color secondary = colors.getSecondaryColor();
-        Color tertiary = colors.getTertiaryColor();
-        int primaryVal = primary != null ? primary.toArgb() : 0;
-        int secondaryVal = secondary != null ? secondary.toArgb() : 0;
-        int tertiaryVal = tertiary != null ? tertiary.toArgb() : 0;
-        int colorHints = 0;
-        try {
-            if (mWCColorHintsMethod != null) {
-                colorHints = (Integer) mWCColorHintsMethod.invoke(colors);
-            }
-        } catch (Exception exc) {
-            Log.e(TAG, "error calling color hints", exc);
-        }
-        return new WallpaperColorsCompat(primaryVal, secondaryVal, tertiaryVal, colorHints);
     }
 }

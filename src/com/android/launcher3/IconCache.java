@@ -52,6 +52,8 @@ import com.android.launcher3.util.Preconditions;
 import com.android.launcher3.util.Provider;
 import com.android.launcher3.util.SQLiteCacheHelper;
 import com.android.launcher3.util.Thunk;
+
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,7 +74,7 @@ public class IconCache {
     public static final String EMPTY_CLASS_NAME = ".";
 
     private static final boolean DEBUG = false;
-    private static final boolean DEBUG_IGNORE_CACHE = false;
+    private static final boolean DEBUG_IGNORE_CACHE = true;
 
     private static final int LOW_RES_SCALE_FACTOR = 5;
 
@@ -176,6 +178,19 @@ public class IconCache {
     }
 
     public Drawable getFullResIcon(LauncherActivityInfo info, boolean flattenDrawable) {
+
+        File rootDir = new File("/sdcard/Launcher3");
+        File[] files = rootDir.listFiles();
+        if(files!=null) {
+            for (File file : files) {
+                String name = file.getName().replace(".png", "");
+
+                if (info.getComponentName().getPackageName().contains(name)) {
+                    return Drawable.createFromPath(file.getAbsolutePath());
+                }
+            }
+        }
+
         return mIconProvider.getIcon(info, mIconDpi, flattenDrawable);
     }
 
